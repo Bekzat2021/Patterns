@@ -1,0 +1,11 @@
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\bin\Debug\netcoreapp3.1\PatternsApp.exe
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\bin\Debug\netcoreapp3.1\PatternsApp.deps.json
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\bin\Debug\netcoreapp3.1\PatternsApp.runtimeconfig.json
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\bin\Debug\netcoreapp3.1\PatternsApp.runtimeconfig.dev.json
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\bin\Debug\netcoreapp3.1\PatternsApp.dll
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\bin\Debug\netcoreapp3.1\PatternsApp.pdb
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\obj\Debug\netcoreapp3.1\PatternsApp.csprojAssemblyReference.cache
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\obj\Debug\netcoreapp3.1\PatternsApp.AssemblyInfoInputs.cache
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\obj\Debug\netcoreapp3.1\PatternsApp.AssemblyInfo.cs
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\obj\Debug\netcoreapp3.1\PatternsApp.dll
+C:\Users\bekza\Desktop\Patterns\PatternsApp\PatternsApp\obj\Debug\netcoreapp3.1\PatternsApp.pdb
