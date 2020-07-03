@@ -1,5 +1,10 @@
 ﻿using System;
+using System.IO;
+using System.Net.Http;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+
 
 namespace PatternsApp
 {
@@ -12,21 +17,11 @@ namespace PatternsApp
             //figure.GetInfo();
             //clonedFigure.GetInfo();
 
-            //IFigure circle = new Circle(30);
-            //var clonedCircle = circle.Clone();
-            //circle.GetInfo();
-            //clonedCircle.GetInfo();
-
-            IUser admin = new Admin("Admin01");
-            var admin02 = admin.Clone();
-            admin.Info();
-            admin02.Info();
-
-
-            IUser player = new Player("Ken0235");
-            IUser player5 = player.Clone();
-            player.Info();
-            player5.Info();
+            Circle circle = new Circle(30, 50, 60);
+            var clonedCircle = circle.Clone() as Circle;
+            circle.Point.X = 100;
+            circle.GetInfo();
+            clonedCircle.GetInfo();
         }
     }
 
@@ -60,61 +55,42 @@ namespace PatternsApp
     class Circle : IFigure
     {
         int radius;
-        public Circle(int r)
+        public Point Point { get; set; }
+        public Circle(int r, int x, int y)
         {
             radius = r;
+            this.Point = new Point { X = x, Y = y };
         }
         public IFigure Clone()
         {
-            return new Circle(this.radius);
+            return this.MemberwiseClone() as IFigure;
+        }
+
+        public object DeepCopy()
+        {
+            object figure = null;
+            using (MemoryStream tempStream = new MemoryStream())
+            {
+                BinaryFormatter binFormatter = new BinaryFormatter(null,
+                    new StreamingContext(StreamingContextStates.Clone));
+
+                binFormatter.Serialize(tempStream, this);
+                tempStream.Seek(0, SeekOrigin.Begin);
+
+                figure = binFormatter.Deserialize(tempStream);
+            }
+            return figure;
         }
 
         public void GetInfo()
         {
-            Console.WriteLine($"Круг радиусом {radius}");
+            Console.WriteLine($"Круг радиусом {radius} и центром в точке ({Point.X}, {Point.Y})");
         }
     }
 
-    interface IUser
+    class Point
     {
-        IUser Clone();
-        void Info();
-    }
-
-    class Admin : IUser
-    {
-        public string Name { get; set; }
-        public Admin(string name)
-        {
-            Name = name;
-        }
-
-        public IUser Clone()
-        {
-            return new Admin(Name);
-        }
-
-        public void Info()
-        {
-            Console.WriteLine($"My name is {Name}");
-        }
-    }
-
-    class Player : IUser
-    {
-        public string Nickname { get; set; }
-        public Player(string nickname)
-        {
-            Nickname = nickname;
-        }
-        public IUser Clone()
-        {
-            return new Player(Nickname);
-        }
-
-        public void Info()
-        {
-            Console.WriteLine($"My Nickname is {Nickname}");
-        }
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 }
