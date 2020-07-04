@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Threading;
 
 
@@ -12,85 +13,93 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            //IFigure figure = new Rectangle(30, 40);
-            //IFigure clonedFigure = figure.Clone();
-            //figure.GetInfo();
-            //clonedFigure.GetInfo();
-
-            Circle circle = new Circle(30, 50, 60);
-            var clonedCircle = circle.Clone() as Circle;
-            circle.Point.X = 100;
-            circle.GetInfo();
-            clonedCircle.GetInfo();
+            Factory factory = new Factory();
+            HondaFactory hondaBuilder = new HondaFactory();
+            Car honda = factory.Build(hondaBuilder);
+            Console.WriteLine(honda);
         }
     }
 
-    interface IFigure
+    class Engine
     {
-        IFigure Clone();
-        void GetInfo();
+        public string EngineInfo { get; set; }
     }
 
-    class Rectangle : IFigure
+    class Conditioner
     {
-        int width;
-        int height;
-
-        public Rectangle(int w, int h)
-        {
-            width = w;
-            height = h;
-        }
-        public IFigure Clone()
-        {
-            return new Rectangle(this.width, this.height);
-        }
-
-        public void GetInfo()
-        {
-            Console.WriteLine($"Прямоугольник длиной {height} и шириной {width}");
-        }
+        public bool ItHas { get; set; }
     }
 
-    class Circle : IFigure
+    class Paint
     {
-        int radius;
-        public Point Point { get; set; }
-        public Circle(int r, int x, int y)
-        {
-            radius = r;
-            this.Point = new Point { X = x, Y = y };
-        }
-        public IFigure Clone()
-        {
-            return this.MemberwiseClone() as IFigure;
-        }
+        public string Name { get; set; }
+    }
 
-        public object DeepCopy()
+    class Car
+    {
+        public Engine Engine { get; set; }
+        public Conditioner Conditioner { get; set; }
+        public Paint Paint { get; set; }
+        public string Name { get; set; }
+
+        public override string ToString()
         {
-            object figure = null;
-            using (MemoryStream tempStream = new MemoryStream())
-            {
-                BinaryFormatter binFormatter = new BinaryFormatter(null,
-                    new StreamingContext(StreamingContextStates.Clone));
-
-                binFormatter.Serialize(tempStream, this);
-                tempStream.Seek(0, SeekOrigin.Begin);
-
-                figure = binFormatter.Deserialize(tempStream);
-            }
-            return figure;
-        }
-
-        public void GetInfo()
-        {
-            Console.WriteLine($"Круг радиусом {radius} и центром в точке ({Point.X}, {Point.Y})");
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Name: " + Name + "\n");
+            sb.Append("Engine volume: " + Engine.EngineInfo + "\n");
+            sb.Append("Conditioner: " + Conditioner.ItHas.ToString() + "\n");
+            sb.Append("Color: " + Paint.Name + "\n");
+            return sb.ToString();
         }
     }
 
-    class Point
+    abstract class CarFactory
     {
-        public int X { get; set; }
-        public int Y { get; set; }
+        public Car Car { get; private set; }
+        public CarFactory()
+        {
+            Car = new Car();
+        }
+
+        public abstract void SetEngine();
+        public abstract void SetConditioner();
+        public abstract void SetPaint();
+
+        public abstract void SetName();
+    }
+
+    class HondaFactory : CarFactory
+    {
+        public override void SetName()
+        {
+            this.Car.Name = "Honda Civic";
+        }
+
+        public override void SetEngine()
+        {
+            this.Car.Engine = new Engine { EngineInfo = "1.8" };
+        }
+
+        public override void SetConditioner()
+        {
+            this.Car.Conditioner = new Conditioner { ItHas = true };
+        }
+
+        public override void SetPaint()
+        {
+            this.Car.Paint = new Paint { Name = "Red" };
+        }
+    }
+
+    class Factory
+    {
+        public Car Build(CarFactory carFactory)
+        {
+            carFactory.SetName();
+            carFactory.SetEngine();
+            carFactory.SetConditioner();
+            carFactory.SetPaint();
+            return carFactory.Car;
+        }
     }
 }
