@@ -13,93 +13,62 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Factory factory = new Factory();
-            HondaFactory hondaBuilder = new HondaFactory();
-            Car honda = factory.Build(hondaBuilder);
-            Console.WriteLine(honda);
+            Navigator navigator = new Navigator("аэропорт", "дом", new Walk());
+            navigator.Move();
+
+            navigator.MoveType = new onCar();
+            navigator.Move();
+
+            navigator.MoveType = new OnBus();
+            navigator.Move();
         }
     }
 
-    class Engine
+    interface IMove
     {
-        public string EngineInfo { get; set; }
+        void Move();
     }
 
-    class Conditioner
+    class Walk : IMove
     {
-        public bool ItHas { get; set; }
-    }
-
-    class Paint
-    {
-        public string Name { get; set; }
-    }
-
-    class Car
-    {
-        public Engine Engine { get; set; }
-        public Conditioner Conditioner { get; set; }
-        public Paint Paint { get; set; }
-        public string Name { get; set; }
-
-        public override string ToString()
+        public void Move()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("Name: " + Name + "\n");
-            sb.Append("Engine volume: " + Engine.EngineInfo + "\n");
-            sb.Append("Conditioner: " + Conditioner.ItHas.ToString() + "\n");
-            sb.Append("Color: " + Paint.Name + "\n");
-            return sb.ToString();
+            Console.WriteLine("пешком");
         }
     }
 
-    abstract class CarFactory
+    class onCar : IMove
     {
-        public Car Car { get; private set; }
-        public CarFactory()
+        public void Move()
         {
-            Car = new Car();
-        }
-
-        public abstract void SetEngine();
-        public abstract void SetConditioner();
-        public abstract void SetPaint();
-
-        public abstract void SetName();
-    }
-
-    class HondaFactory : CarFactory
-    {
-        public override void SetName()
-        {
-            this.Car.Name = "Honda Civic";
-        }
-
-        public override void SetEngine()
-        {
-            this.Car.Engine = new Engine { EngineInfo = "1.8" };
-        }
-
-        public override void SetConditioner()
-        {
-            this.Car.Conditioner = new Conditioner { ItHas = true };
-        }
-
-        public override void SetPaint()
-        {
-            this.Car.Paint = new Paint { Name = "Red" };
+            Console.WriteLine("на автомобиле");
         }
     }
 
-    class Factory
+    class OnBus : IMove
     {
-        public Car Build(CarFactory carFactory)
+        public void Move()
         {
-            carFactory.SetName();
-            carFactory.SetEngine();
-            carFactory.SetConditioner();
-            carFactory.SetPaint();
-            return carFactory.Car;
+            Console.WriteLine("на автобусе");
+        }
+    }
+
+    class Navigator
+    {
+        public string Start { get; set; }
+        public string Finish { get; set; }
+        public IMove MoveType { get; set; }
+        public Navigator(string start, string finish, IMove moveType)
+        {
+            Start = start;
+            Finish = finish;
+            MoveType = moveType;
+        }
+
+        public void Move()
+        {
+            Console.Write($"Вы перемещаетесть из {Start} в {Finish} ");
+            MoveType.Move();
         }
     }
 }
