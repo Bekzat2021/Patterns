@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,161 +12,76 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Kamenshik kamenshik = new Kamenshik();
-            Santehik santehik = new Santehik();
-            Electrik electrik = new Electrik();
+            Jet jet = new Jet();
+            Helicopter helicopter = new Helicopter();
 
-            MacroCommand commands = new MacroCommand(new List<ICommand>{
-                new KamnshikCommand(kamenshik),
-                new SantehnikCommand(santehik),
-                new ElectrikCommand(electrik)
-            });
-
-            Brigadir brigadir = new Brigadir(commands);
-            brigadir.Execute();
-            brigadir.Undo();
+            jet.Fly();
+            helicopter.Fly();
         }
     }
 
-    interface ICommand
+    abstract class Aircraft
     {
-        void Execute();
-        void Undo();
+        public abstract void Fly();
     }
 
-    class MacroCommand : ICommand
+    abstract class AircraftWithEngine : Aircraft
     {
-        private List<ICommand> commands;
-        public MacroCommand(List<ICommand> com)
+        sealed public override void Fly()
         {
-            commands = com;
-        }
-        public void Execute()
-        {
-            foreach (ICommand command in commands)
-            {
-                command.Execute();
-            }
+            PreflightCheck();
+            Takeoff();
+            Flight();
+            Landing();
         }
 
-        public void Undo()
+        public abstract void PreflightCheck();
+        public abstract void Takeoff();
+        public virtual void Flight()
         {
-            foreach (ICommand command in commands)
-            {
-                command.Undo();
-            }
+            Console.WriteLine("Aircraft with engine fly");
         }
+        public abstract void Landing();
     }
 
-    class Kamenshik 
+    class Jet : AircraftWithEngine
     {
-        public void StartWork()
+        public override void PreflightCheck()
         {
-            Console.WriteLine("Каменьщик начал класт камень");
+            Console.WriteLine("Jet's pre flight check");
         }
 
-        public void StopWork()
+        public override void Takeoff()
         {
-            Console.WriteLine("Каменьщик закончил класть камень");
-        }
-    }
-
-    class KamnshikCommand : ICommand
-    {
-        private Kamenshik kamenshik;
-        public KamnshikCommand(Kamenshik k)
-        {
-            kamenshik = k;
-        }
-        public void Execute()
-        {
-            kamenshik.StartWork();
+            Console.WriteLine("Jet's takeoff on long runway");
         }
 
-        public void Undo()
+        public override void Landing()
         {
-            kamenshik.StopWork();
+            Console.WriteLine("Jet's landing on long runway");
         }
     }
 
-    class Santehik 
+    class Helicopter : AircraftWithEngine
     {
-        public void StartWork()
+        public override void PreflightCheck()
         {
-            Console.WriteLine("Сантехник начал проводить трубы");
+            Console.WriteLine("Helicopter's pre flight check");
         }
 
-        public void StopWork()
+        public override void Takeoff()
         {
-            Console.WriteLine("Сантехник закончил проводить трубы");
-        }
-    }
-
-    class SantehnikCommand : ICommand
-    {
-        Santehik santehik;
-        public SantehnikCommand(Santehik s)
-        {
-            santehik = s;
-        }
-        public void Execute()
-        {
-            santehik.StartWork();
+            Console.WriteLine("Helicopter's takeoff vertical");
         }
 
-        public void Undo()
+        public override void Flight()
         {
-            santehik.StopWork();
-        }
-    }
-
-    class Electrik 
-    {
-        public void StartWork()
-        {
-            Console.WriteLine("Электрик начал ложить провода");
+            Console.WriteLine("Helicopter flight sideways");
         }
 
-        public void StopWork()
+        public override void Landing()
         {
-            Console.WriteLine("Электрик закончил ложить провода");
-        }
-    }
-
-    class ElectrikCommand : ICommand
-    {
-        private Electrik electric;
-        public ElectrikCommand(Electrik e)
-        {
-            electric = e;
-        }
-        public void Execute()
-        {
-            electric.StartWork();
-        }
-
-        public void Undo()
-        {
-            electric.StopWork();
-        }
-    }
-
-    class Brigadir : ICommand
-    {
-        private ICommand command;
-        public Brigadir(ICommand c)
-        {
-            command = c;
-        }
-
-        public void Execute()
-        {
-            command.Execute();
-        }
-
-        public void Undo()
-        {
-            command.Undo();
+            Console.WriteLine("Helicopter's vertical landing");
         }
     }
 }
