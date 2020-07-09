@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
-
+using System.Threading.Tasks;
 
 namespace PatternsApp
 {
@@ -14,185 +14,161 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            //Stock stock = new Stock();
-            //Bank bank = new Bank("Unity bank", stock);
-            //Broker broker = new Broker("John SMith", stock);
+            Kamenshik kamenshik = new Kamenshik();
+            Santehik santehik = new Santehik();
+            Electrik electrik = new Electrik();
 
-            //stock.Market();
-            //broker.StopTrade();
-            //Console.WriteLine();
+            MacroCommand commands = new MacroCommand(new List<ICommand>{
+                new KamnshikCommand(kamenshik),
+                new SantehnikCommand(santehik),
+                new ElectrikCommand(electrik)
+            });
 
-            //stock.Market();
-
-            Engineer engineer = new Engineer();
-            Viewer smith = new Viewer();
-            Viewer bob = new Viewer();
-
-            engineer.RegisterViewer(smith);
-            engineer.RegisterViewer(bob);
-            engineer.Make(false);
+            Brigadir brigadir = new Brigadir(commands);
+            brigadir.Execute();
+            brigadir.Undo();
         }
     }
 
-    interface IEngineer
+    interface ICommand
     {
-        void RegisterViewer(IViewer viewer);
-        void RemoveViewer(IViewer viewer);
-        void NotifyViewers(bool cool);
+        void Execute();
+        void Undo();
     }
 
-    interface IViewer
+    class MacroCommand : ICommand
     {
-        void Update(bool cool);
-    }
-
-    class Engineer : IEngineer
-    {
-        List<IViewer> viewers;
-        public Engineer()
+        private List<ICommand> commands;
+        public MacroCommand(List<ICommand> com)
         {
-            viewers = new List<IViewer>();
+            commands = com;
         }
-        public void NotifyViewers(bool cool)
+        public void Execute()
         {
-            foreach (var item in viewers)
+            foreach (ICommand command in commands)
             {
-                item.Update(cool);
+                command.Execute();
             }
         }
 
-        public void RegisterViewer(IViewer viewer)
+        public void Undo()
         {
-            viewers.Add(viewer);
-        }
-
-        public void RemoveViewer(IViewer viewer)
-        {
-            viewers.Remove(viewer);
-        }
-
-        public void Make(bool cool)
-        {
-            NotifyViewers(cool);
-        }
-    }
-
-    class Viewer : IViewer
-    {
-        public void Update(bool cool)
-        {
-            if (cool)
-                Console.WriteLine("Engineer make something cool");
-            else
-                Console.WriteLine("Engineer make something NOT cool");
-        }
-    }
-
-    #region
-    interface IObserver
-    {
-        void Update(Object obj);
-    }
-
-    interface IObservable
-    {
-        void RegisterObserver(IObserver observer);
-        void RemoveObserver(IObserver observer);
-        void NotifyObservers();
-    }
-
-    class Stock : IObservable
-    {
-        StockInfo sInfo;
-        List<IObserver> observers;
-
-        public Stock()
-        {
-            observers = new List<IObserver>();
-            sInfo = new StockInfo();
-        }
-
-        public void Market()
-        {
-            Random rnd = new Random();
-            sInfo.USD = rnd.Next(20, 40);
-            sInfo.Euro = rnd.Next(30, 50);
-            NotifyObservers();
-        }
-
-        public void RegisterObserver(IObserver observer)
-        {
-            observers.Add(observer);
-        }
-
-        public void RemoveObserver(IObserver observer)
-        {
-            observers.Remove(observer);
-        }
-        public void NotifyObservers()
-        {
-            foreach (var observer in observers)
+            foreach (ICommand command in commands)
             {
-                observer.Update(sInfo);
+                command.Undo();
             }
         }
     }
 
-    class Broker : IObserver
+    class Kamenshik 
     {
-        public string Name { get; set; }
-        IObservable stock;
-
-        public Broker(string name, IObservable observable)
+        public void StartWork()
         {
-            Name = name;
-            stock = observable;
-            stock.RegisterObserver(this);
+            Console.WriteLine("Каменьщик начал класт камень");
         }
 
-
-        public void Update(object obj)
+        public void StopWork()
         {
-            StockInfo sInfo = (StockInfo)obj;
-
-            if(sInfo.USD > 30)
-                Console.WriteLine($"Брокер {Name} продает доллары;  Курс доллара: {sInfo.USD}");
-            else
-                Console.WriteLine($"Брокер {Name} покупает доллары;  Курс доллара: {sInfo.USD}");
-        }
-
-        public void StopTrade()
-        {
-            stock.RemoveObserver(this);
-            stock = null;
+            Console.WriteLine("Каменьщик закончил класть камень");
         }
     }
 
-    class Bank : IObserver
+    class KamnshikCommand : ICommand
     {
-        public string Name { get; set; }
-        IObservable stock;
-        public Bank(string name, IObservable stock)
+        private Kamenshik kamenshik;
+        public KamnshikCommand(Kamenshik k)
         {
-            Name = name;
-            this.stock = stock;
-            stock.RegisterObserver(this);
+            kamenshik = k;
         }
-        public void Update(object obj)
+        public void Execute()
         {
-            StockInfo sInfo = (StockInfo)obj;
+            kamenshik.StartWork();
+        }
 
-            if(sInfo.Euro > 40)
-                Console.WriteLine($"Банк {Name} продает евро;  Курс евро: {sInfo.Euro}");
-            else
-                Console.WriteLine($"Банк {Name} покупает евро;  Курс евро: {sInfo.Euro}");
+        public void Undo()
+        {
+            kamenshik.StopWork();
         }
     }
 
-    class StockInfo
+    class Santehik 
     {
-        public int USD { get; set; }
-        public int Euro { get; set; }
+        public void StartWork()
+        {
+            Console.WriteLine("Сантехник начал проводить трубы");
+        }
+
+        public void StopWork()
+        {
+            Console.WriteLine("Сантехник закончил проводить трубы");
+        }
     }
-    #endregion
+
+    class SantehnikCommand : ICommand
+    {
+        Santehik santehik;
+        public SantehnikCommand(Santehik s)
+        {
+            santehik = s;
+        }
+        public void Execute()
+        {
+            santehik.StartWork();
+        }
+
+        public void Undo()
+        {
+            santehik.StopWork();
+        }
+    }
+
+    class Electrik 
+    {
+        public void StartWork()
+        {
+            Console.WriteLine("Электрик начал ложить провода");
+        }
+
+        public void StopWork()
+        {
+            Console.WriteLine("Электрик закончил ложить провода");
+        }
+    }
+
+    class ElectrikCommand : ICommand
+    {
+        private Electrik electric;
+        public ElectrikCommand(Electrik e)
+        {
+            electric = e;
+        }
+        public void Execute()
+        {
+            electric.StartWork();
+        }
+
+        public void Undo()
+        {
+            electric.StopWork();
+        }
+    }
+
+    class Brigadir : ICommand
+    {
+        private ICommand command;
+        public Brigadir(ICommand c)
+        {
+            command = c;
+        }
+
+        public void Execute()
+        {
+            command.Execute();
+        }
+
+        public void Undo()
+        {
+            command.Undo();
+        }
+    }
 }
