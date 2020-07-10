@@ -12,76 +12,40 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Jet jet = new Jet();
-            Helicopter helicopter = new Helicopter();
+            Library library = new Library();
+            Reader reader = new Reader();
+            reader.SeeBooks(library);
 
-            jet.Fly();
-            helicopter.Fly();
+            Week days = new Week();
+            User user = new User();
+            user.SeeDays();
         }
     }
 
-    abstract class Aircraft
+    interface IDaysIterator
     {
-        public abstract void Fly();
+        bool HasNext();
+        Day Next();
     }
 
-    abstract class AircraftWithEngine : Aircraft
+    interface IDaysEnumerable
     {
-        sealed public override void Fly()
-        {
-            PreflightCheck();
-            Takeoff();
-            Flight();
-            Landing();
-        }
-
-        public abstract void PreflightCheck();
-        public abstract void Takeoff();
-        public virtual void Flight()
-        {
-            Console.WriteLine("Aircraft with engine fly");
-        }
-        public abstract void Landing();
+        Day this[int index] { get; }
+        int Count { get; }
+        IDaysIterator CreateNumerator();
     }
 
-    class Jet : AircraftWithEngine
+    class Day
     {
-        public override void PreflightCheck()
-        {
-            Console.WriteLine("Jet's pre flight check");
-        }
-
-        public override void Takeoff()
-        {
-            Console.WriteLine("Jet's takeoff on long runway");
-        }
-
-        public override void Landing()
-        {
-            Console.WriteLine("Jet's landing on long runway");
-        }
+        public string Name { get; set; }
     }
 
-    class Helicopter : AircraftWithEngine
+    class Week
     {
-        public override void PreflightCheck()
+        Day[] days;
+        public Week()
         {
-            Console.WriteLine("Helicopter's pre flight check");
-        }
-
-        public override void Takeoff()
-        {
-            Console.WriteLine("Helicopter's takeoff vertical");
-        }
-
-        public override void Flight()
-        {
-            Console.WriteLine("Helicopter flight sideways");
-        }
-
-        public override void Landing()
-        {
-            Console.WriteLine("Helicopter's vertical landing");
+            //days = Закончить
         }
     }
 }
