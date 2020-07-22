@@ -12,248 +12,81 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            //Library library = new Library();
-            //Reader reader = new Reader();
-            //reader.SeeBooks(library);
+            Water water = new Water(new LiquidState());
+            water.Heat();
+            water.Heat();
 
-            Week week = new Week();
-            User user = new User();
-            user.SeeWeek(week);
-
-            Library library = new Library();
-            Reader reader = new Reader();
-            reader.SeeBooks(library);
+            water.Froze();
+            water.Froze();
+            water.Froze();
         }
     }
 
-    class Reader
+    interface IWaterState
     {
-        public void SeeBooks(IBookNumerable iterator)
-        {
-            var libraryIterator = iterator.CreateIterator();
-            while (libraryIterator.HasNext())
-            {
-                Book book = libraryIterator.Next();
-                Console.WriteLine(book.Name);
-            }
-        }
+        void Heat(Water water);
+        void Froze(Water water);
     }
 
-    interface IBookIterator
+    class SolidState : IWaterState
     {
-        bool HasNext();
-        Book Next();
+        public void Froze(Water water)
+        {
+            Console.WriteLine("Продолжаем заморозку льда");
+        }
+
+        public void Heat(Water water)
+        {
+            Console.WriteLine("Превращаем лёд в жидкость");
+            water.State = new LiquidState();
+        }
     }
 
-    interface IBookNumerable
+    class LiquidState : IWaterState
     {
-        int Count { get; }
-        Book this[int index] { get; }
-        IBookIterator CreateIterator();
+        public void Froze(Water water)
+        {
+            Console.WriteLine("Превращаем жидкость в лёд");
+            water.State = new SolidState();
+        }
+
+        public void Heat(Water water)
+        {
+            Console.WriteLine("Превращаем жидкость в пар");
+            water.State = new GasState();
+        }
     }
 
-    class Book
+    class GasState : IWaterState
     {
-        public string Name { get; set; }
+        public void Froze(Water water)
+        {
+            Console.WriteLine("Превращаем пар в жидкость");
+            water.State = new LiquidState();
+        }
+
+        public void Heat(Water water)
+        {
+            Console.WriteLine("Повышаем температуру пара");
+        }
     }
 
-    class Library : IBookNumerable
+    class Water
     {
-        Book[] books;
-        public Library()
+        public IWaterState State { get; set; }
+        public Water(IWaterState state)
         {
-            books = new Book[]{
-                new Book { Name = "Book one" },
-                new Book { Name = "Book two" },
-                new Book { Name = "Book three" },
-                new Book { Name = "Book four" }
-            };
+            State = state;
         }
 
-        public Book this[int index] => books[index];
-
-        public int Count => books.Length;
-
-        public IBookIterator CreateIterator()
+        public void Heat()
         {
-            return new LibraryIterator(this);
+            State.Heat(this);
+        }
+
+        public void Froze()
+        {
+            State.Froze(this);
         }
     }
-
-    class LibraryIterator : IBookIterator
-    {
-        private IBookNumerable numerable;
-        int index = 0;
-        public LibraryIterator(IBookNumerable numerable)
-        {
-            this.numerable = numerable;
-        }
-        public bool HasNext()
-        {
-            return index < numerable.Count;
-        }
-
-        public Book Next()
-        {
-            return numerable[index++];
-        }
-    }
-
-    #region 
-    class User
-    {
-        public void SeeWeek(Week week)
-        {
-            IDayIterator iterator = week.CreateIterator();
-            while (iterator.HasNext())
-            {
-                Day day = iterator.Next();
-                Console.WriteLine(day.Name);
-            }
-        }
-    }
-
-    class Day
-    {
-        public string Name { get; set; }
-    }
-
-    interface IDayIterator
-    {
-        bool HasNext();
-        Day Next();
-    }
-
-    interface IDayNumerable
-    {
-        IDayIterator CreateIterator();
-        int Count { get; }
-        Day this[int index] { get; } //индексатор
-    }
-
-    class Week : IDayNumerable
-    {
-        Day[] days;
-        public Week()
-        {
-            days = new Day[]{ new Day { Name = "Monday" },
-                new Day { Name = "Tuesday" },
-                new Day { Name = "Wednesday" },
-                new Day { Name = "Thursday" },
-                new Day { Name = "Friday" },
-                new Day { Name = "Saturday" },
-                new Day { Name = "Sunday" }};
-        }
-
-        public Day this[int index] => days[index];
-
-        public int Count => days.Length;
-
-        public IDayIterator CreateIterator()
-        {
-            return new WeekIterator(this);
-        }
-    }
-
-    class WeekIterator : IDayIterator
-    {
-        IDayNumerable numerable;
-        int index = 0;
-        public WeekIterator(IDayNumerable n)
-        {
-            numerable = n;
-        }
-
-        public bool HasNext()
-        {
-            return index < numerable.Count;
-        }
-
-        public Day Next()
-        {
-            return numerable[index++];
-        }
-    }
-
-    #endregion
-
-    //класс читателя *************************************************************
-    //class Reader
-    //{
-    //    public void SeeBooks(Library library)
-    //    {
-    //        IBookIterator iterator = library.CreateNumerator();
-    //        while (iterator.HasNext())
-    //        {
-    //            Book book = iterator.Next();
-    //            Console.WriteLine(book.Name);
-    //        }
-    //    }
-    //}
-    ////класс книги с свойством имени
-    //class Book
-    //{
-    //    public string Name { get; set; }
-    //}
-    ////итератор 
-    //interface IBookIterator
-    //{
-    //    bool HasNext();
-    //    Book Next();
-    //}
-
-    //interface IBookNumerable
-    //{
-    //    IBookIterator CreateNumerator();
-    //    int Count { get; }
-    //    Book this[int index] { get; }
-    //}
-
-    //class Library : IBookNumerable
-    //{
-    //    private Book[] books;
-    //    public Library()
-    //    {
-    //        books = new Book[]
-    //        {
-    //            new Book{ Name = "Война и мир" },
-    //            new Book { Name = "Отцы и дети" },
-    //            new Book { Name = "Вишневый сад" }
-    //        };
-    //    }
-
-    //    public int Count
-    //    {
-    //        get { return books.Length; }
-    //    }
-
-    //    public Book this[int index]
-    //    {
-    //        get { return books[index]; }
-    //    }
-
-    //    public IBookIterator CreateNumerator()
-    //    {
-    //        return new LibraryNumertor(this);
-    //    }
-    //}
-
-    //class LibraryNumertor : IBookIterator
-    //{
-    //    IBookNumerable aggregate;
-    //    int index = 0;
-    //    public LibraryNumertor(IBookNumerable a)
-    //    {
-    //        aggregate = a;
-    //    }
-    //    public bool HasNext()
-    //    {
-    //        return index < aggregate.Count;
-    //    }
-
-    //    public Book Next()
-    //    {
-    //        return aggregate[index++];
-    //    }
-    //}
 }
