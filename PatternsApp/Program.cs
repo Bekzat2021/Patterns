@@ -12,81 +12,156 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Water water = new Water(new LiquidState());
-            water.Heat();
-            water.Heat();
+            //Receiver receiver = new Receiver(false, false, true);
 
-            water.Froze();
-            water.Froze();
-            water.Froze();
+            //PaymentHandler bankHandler = new BankPaymentHandler();
+            //PaymentHandler moneyHandler = new MoneyPaymentHandler();
+            //PaymentHandler payPalHandler = new PayPalPaymentHandler();
+
+            //bankHandler.Successor = moneyHandler;
+            //moneyHandler.Successor = payPalHandler;
+
+            //bankHandler.Handle(receiver);
+
+            Client client = new Client(false, false, true);
+            DepartmentsHandler salesHandler = new SalesDepartment();
+            DepartmentsHandler itHandler = new ItDepartment();
+            DepartmentsHandler marketingHandler = new MarketingDepartment();
+
+            salesHandler.Successor = itHandler;
+            itHandler.Successor = marketingHandler;
+
+            salesHandler.Handler(client);
+
+
+            int num = 1;
+            for (int i = 0; i < 100; i++)
+            {
+                switch (num)
+                {
+                    case 1:
+                        Console.Write("\\---\r");
+                        num = 2;
+                        break;
+                    case 2:
+                        Console.Write("-|--\r");
+                        num = 3;
+                        break;
+                    case 3:
+                        Console.Write("--|-\r");
+                        num = 4;
+                        break;
+                    case 4:
+                        Console.Write("---/\r");
+                        num = 1;
+                        break;
+                }
+                Thread.Sleep(300);
+            }
         }
     }
 
-    interface IWaterState
+    class Client
     {
-        void Heat(Water water);
-        void Froze(Water water);
+        public bool sales { get; set; }
+        public bool it { get; set; }
+        public bool marketing { get; set; }
+        public Client(bool s, bool i, bool m)
+        {
+            sales = s;
+            it = i;
+            marketing = m;
+        }
     }
 
-    class SolidState : IWaterState
+    abstract class DepartmentsHandler
     {
-        public void Froze(Water water)
-        {
-            Console.WriteLine("Продолжаем заморозку льда");
-        }
-
-        public void Heat(Water water)
-        {
-            Console.WriteLine("Превращаем лёд в жидкость");
-            water.State = new LiquidState();
-        }
+        public DepartmentsHandler Successor { get; set; }
+        public abstract void Handler(Client client);
     }
 
-    class LiquidState : IWaterState
+    class SalesDepartment : DepartmentsHandler
     {
-        public void Froze(Water water)
+        public override void Handler(Client client)
         {
-            Console.WriteLine("Превращаем жидкость в лёд");
-            water.State = new SolidState();
-        }
-
-        public void Heat(Water water)
-        {
-            Console.WriteLine("Превращаем жидкость в пар");
-            water.State = new GasState();
+            if (client.sales)
+                Console.WriteLine("Client served in sales department");
+            else if (Successor != null)
+                Successor.Handler(client);
         }
     }
 
-    class GasState : IWaterState
+    class ItDepartment : DepartmentsHandler
     {
-        public void Froze(Water water)
+        public override void Handler(Client client)
         {
-            Console.WriteLine("Превращаем пар в жидкость");
-            water.State = new LiquidState();
-        }
-
-        public void Heat(Water water)
-        {
-            Console.WriteLine("Повышаем температуру пара");
+            if (client.it)
+                Console.WriteLine("Client served in sales department");
+            else if (Successor != null)
+                Successor.Handler(client);
         }
     }
 
-    class Water
+    class MarketingDepartment : DepartmentsHandler
     {
-        public IWaterState State { get; set; }
-        public Water(IWaterState state)
+        public override void Handler(Client client)
         {
-            State = state;
-        }
-
-        public void Heat()
-        {
-            State.Heat(this);
-        }
-
-        public void Froze()
-        {
-            State.Froze(this);
+            if (client.marketing)
+                Console.WriteLine("Client served in sales department");
+            else if (Successor != null)
+                Successor.Handler(client);
         }
     }
+
+    //class Receiver
+    //{
+    //    public bool BankTransfer { get; set; }
+    //    public bool MoneyTransfer { get; set; }
+    //    public bool PayPalTransfer { get; set; }
+    //    public Receiver(bool bt, bool mt, bool ppt)
+    //    {
+    //        BankTransfer = bt;
+    //        MoneyTransfer = mt;
+    //        PayPalTransfer = ppt;
+    //    }
+    //}
+
+    //abstract class PaymentHandler
+    //{
+    //    public PaymentHandler Successor { get; set; }
+    //    public abstract void Handle(Receiver receiver);
+    //}
+
+    //class BankPaymentHandler : PaymentHandler
+    //{
+    //    public override void Handle(Receiver receiver)
+    //    {
+    //        if (receiver.BankTransfer)
+    //            Console.WriteLine("Выполняем банковский перевод");
+    //        else if (Successor != null) 
+    //            Successor.Handle(receiver);
+    //    }
+    //}
+
+    //class MoneyPaymentHandler : PaymentHandler
+    //{
+    //    public override void Handle(Receiver receiver)
+    //    {
+    //        if (receiver.MoneyTransfer)
+    //            Console.WriteLine("Выполняем перевод через системы денежных переводов");
+    //        else if (Successor != null)
+    //            Successor.Handle(receiver);
+    //    }
+    //}
+
+    //class PayPalPaymentHandler : PaymentHandler
+    //{
+    //    public override void Handle(Receiver receiver)
+    //    {
+    //        if (receiver.PayPalTransfer)
+    //            Console.WriteLine("Выполняем перевод через PayPal");
+    //        else if (Successor != null)
+    //            Successor.Handle(receiver);
+    //    }
+    //}
 }
