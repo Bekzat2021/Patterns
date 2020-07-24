@@ -12,156 +12,71 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            //Receiver receiver = new Receiver(false, false, true);
+            Context context = new Context();
+            context.SetValue("x", 5);
+            context.SetValue("y", 13);
 
-            //PaymentHandler bankHandler = new BankPaymentHandler();
-            //PaymentHandler moneyHandler = new MoneyPaymentHandler();
-            //PaymentHandler payPalHandler = new PayPalPaymentHandler();
+            IExpression expression = new AddExpression(
+                    new NumberExpression("x"), new NumberExpression("y"));
+            
+            int result = expression.Interpret(context);
+            Console.WriteLine(result);
 
-            //bankHandler.Successor = moneyHandler;
-            //moneyHandler.Successor = payPalHandler;
-
-            //bankHandler.Handle(receiver);
-
-            Client client = new Client(false, false, true);
-            DepartmentsHandler salesHandler = new SalesDepartment();
-            DepartmentsHandler itHandler = new ItDepartment();
-            DepartmentsHandler marketingHandler = new MarketingDepartment();
-
-            salesHandler.Successor = itHandler;
-            itHandler.Successor = marketingHandler;
-
-            salesHandler.Handler(client);
-
-
-            int num = 1;
-            for (int i = 0; i < 100; i++)
-            {
-                switch (num)
-                {
-                    case 1:
-                        Console.Write("\\---\r");
-                        num = 2;
-                        break;
-                    case 2:
-                        Console.Write("-|--\r");
-                        num = 3;
-                        break;
-                    case 3:
-                        Console.Write("--|-\r");
-                        num = 4;
-                        break;
-                    case 4:
-                        Console.Write("---/\r");
-                        num = 1;
-                        break;
-                }
-                Thread.Sleep(300);
-            }
         }
     }
 
-    class Client
+    class Context
     {
-        public bool sales { get; set; }
-        public bool it { get; set; }
-        public bool marketing { get; set; }
-        public Client(bool s, bool i, bool m)
+        Dictionary<string, int> variables;
+        public Context()
         {
-            sales = s;
-            it = i;
-            marketing = m;
+            variables = new Dictionary<string, int>();
         }
-    }
 
-    abstract class DepartmentsHandler
-    {
-        public DepartmentsHandler Successor { get; set; }
-        public abstract void Handler(Client client);
-    }
-
-    class SalesDepartment : DepartmentsHandler
-    {
-        public override void Handler(Client client)
+        public int GetValue(string name)
         {
-            if (client.sales)
-                Console.WriteLine("Client served in sales department");
-            else if (Successor != null)
-                Successor.Handler(client);
+            return variables[name];
         }
-    }
 
-    class ItDepartment : DepartmentsHandler
-    {
-        public override void Handler(Client client)
+        public void SetValue(string name, int number)
         {
-            if (client.it)
-                Console.WriteLine("Client served in sales department");
-            else if (Successor != null)
-                Successor.Handler(client);
+            if (variables.ContainsKey(name))
+                variables[name] = number;
+            else
+                variables.Add(name, number);
         }
     }
 
-    class MarketingDepartment : DepartmentsHandler
+    interface IExpression
     {
-        public override void Handler(Client client)
+        int Interpret(Context context);
+    }
+
+    class NumberExpression : IExpression
+    {
+        string name;
+        public NumberExpression(string name)
         {
-            if (client.marketing)
-                Console.WriteLine("Client served in sales department");
-            else if (Successor != null)
-                Successor.Handler(client);
+            this.name = name;
+        }
+        public int Interpret(Context context)
+        {
+            return context.GetValue(name);
         }
     }
 
-    //class Receiver
-    //{
-    //    public bool BankTransfer { get; set; }
-    //    public bool MoneyTransfer { get; set; }
-    //    public bool PayPalTransfer { get; set; }
-    //    public Receiver(bool bt, bool mt, bool ppt)
-    //    {
-    //        BankTransfer = bt;
-    //        MoneyTransfer = mt;
-    //        PayPalTransfer = ppt;
-    //    }
-    //}
-
-    //abstract class PaymentHandler
-    //{
-    //    public PaymentHandler Successor { get; set; }
-    //    public abstract void Handle(Receiver receiver);
-    //}
-
-    //class BankPaymentHandler : PaymentHandler
-    //{
-    //    public override void Handle(Receiver receiver)
-    //    {
-    //        if (receiver.BankTransfer)
-    //            Console.WriteLine("Выполняем банковский перевод");
-    //        else if (Successor != null) 
-    //            Successor.Handle(receiver);
-    //    }
-    //}
-
-    //class MoneyPaymentHandler : PaymentHandler
-    //{
-    //    public override void Handle(Receiver receiver)
-    //    {
-    //        if (receiver.MoneyTransfer)
-    //            Console.WriteLine("Выполняем перевод через системы денежных переводов");
-    //        else if (Successor != null)
-    //            Successor.Handle(receiver);
-    //    }
-    //}
-
-    //class PayPalPaymentHandler : PaymentHandler
-    //{
-    //    public override void Handle(Receiver receiver)
-    //    {
-    //        if (receiver.PayPalTransfer)
-    //            Console.WriteLine("Выполняем перевод через PayPal");
-    //        else if (Successor != null)
-    //            Successor.Handle(receiver);
-    //    }
-    //}
+    class AddExpression : IExpression
+    {
+        IExpression leftExpression;
+        IExpression rightExpression;
+        public AddExpression(IExpression left, IExpression right)
+        {
+            leftExpression = left;
+            rightExpression = right;
+        }
+        public int Interpret(Context context)
+        {
+            return leftExpression.Interpret(context) + rightExpression.Interpret(context);
+        }
+    }
 }
