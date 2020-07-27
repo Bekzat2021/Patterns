@@ -13,17 +13,18 @@ namespace PatternsApp
         static void Main(string[] args)
         {
             Context context = new Context();
-            context.SetValue("x", 5);
-            context.SetValue("y", 13);
 
-            IExpression expression = new AddExpression(
-                    new NumberExpression("x"), new NumberExpression("y"));
-            
-            int result = expression.Interpret(context);
+            context.SetVariable("x", 9);
+            context.SetVariable("y", 7);
+
+            AddExpression sum = new AddExpression(new NumberExpression("x"), new NumberExpression("y"));
+                
+            int result = sum.Interpret(context);
+
             Console.WriteLine(result);
-
         }
     }
+
 
     class Context
     {
@@ -33,17 +34,17 @@ namespace PatternsApp
             variables = new Dictionary<string, int>();
         }
 
-        public int GetValue(string name)
+        public int GetVariable(string name)
         {
             return variables[name];
         }
 
-        public void SetValue(string name, int number)
+        public void SetVariable(string name, int value)
         {
             if (variables.ContainsKey(name))
-                variables[name] = number;
+                variables[name] = value;
             else
-                variables.Add(name, number);
+                variables.Add(name, value);
         }
     }
 
@@ -55,13 +56,14 @@ namespace PatternsApp
     class NumberExpression : IExpression
     {
         string name;
-        public NumberExpression(string name)
+        public NumberExpression(string n)
         {
-            this.name = name;
+            name = n;
         }
+
         public int Interpret(Context context)
         {
-            return context.GetValue(name);
+            return context.GetVariable(name);
         }
     }
 
@@ -69,14 +71,32 @@ namespace PatternsApp
     {
         IExpression leftExpression;
         IExpression rightExpression;
-        public AddExpression(IExpression left, IExpression right)
+
+        public AddExpression(IExpression leftEx, IExpression rightEx)
         {
-            leftExpression = left;
-            rightExpression = right;
+            leftExpression = leftEx;
+            rightExpression = rightEx;
         }
+
         public int Interpret(Context context)
         {
             return leftExpression.Interpret(context) + rightExpression.Interpret(context);
+        }
+    }
+
+    class SubtractExpression : IExpression
+    {
+        IExpression leftExpression;
+        IExpression rightExpression;
+        public SubtractExpression(IExpression leftEx, IExpression rightEx)
+        {
+            leftExpression = leftEx;
+            rightExpression = rightEx;
+        }
+
+        public int Interpret(Context context)
+        {
+            return leftExpression.Interpret(context) - rightExpression.Interpret(context);
         }
     }
 }
