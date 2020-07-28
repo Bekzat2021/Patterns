@@ -12,91 +12,85 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Context context = new Context();
+            ManagerMediator mediator = new ManagerMediator();
+            Colleague programmer = new ProgrammerColleague(mediator);
+            Colleague tester = new TesterColleague(mediator);
+            Colleague customer = new CustomerColleague(mediator);
 
-            context.SetVariable("x", 9);
-            context.SetVariable("y", 7);
+            mediator.Customer = customer;
+            mediator.Programmer = programmer;
+            mediator.Tester = tester;
 
-            AddExpression sum = new AddExpression(new NumberExpression("x"), new NumberExpression("y"));
-                
-            int result = sum.Interpret(context);
-
-            Console.WriteLine(result);
+            customer.Send("Есть заказ, надо сделать программу");
+            programmer.Send("Программа готова, надо протестировать");
+            tester.Send("Программа протестирована и готова к продаже");
         }
     }
 
-
-    class Context
+    public abstract class Mediator
     {
-        Dictionary<string, int> variables;
-        public Context()
+        public abstract void Send(string message, Colleague colleague);
+    }
+
+    public abstract class Colleague
+    {
+        Mediator mediator;
+        public Colleague(Mediator mediator)
         {
-            variables = new Dictionary<string, int>();
+            this.mediator = mediator;
         }
 
-        public int GetVariable(string name)
+        public virtual void Send(string message)
         {
-            return variables[name];
+            mediator.Send(message, this);
         }
 
-        public void SetVariable(string name, int value)
+        public abstract void Notify(string message);
+    }
+
+    public class CustomerColleague : Colleague
+    {
+        public CustomerColleague(Mediator mediator) : base(mediator) { }
+
+        public override void Notify(string message)
         {
-            if (variables.ContainsKey(name))
-                variables[name] = value;
-            else
-                variables.Add(name, value);
+            Console.WriteLine("Сообщение заказчику: " + message);
         }
     }
 
-    interface IExpression
+    public class ProgrammerColleague : Colleague
     {
-        int Interpret(Context context);
-    }
+        public ProgrammerColleague(Mediator mediator) : base(mediator) { }
 
-    class NumberExpression : IExpression
-    {
-        string name;
-        public NumberExpression(string n)
+        public override void Notify(string message)
         {
-            name = n;
-        }
-
-        public int Interpret(Context context)
-        {
-            return context.GetVariable(name);
+            Console.WriteLine("Сообщение программисту: " + message);
         }
     }
 
-    class AddExpression : IExpression
+    public class TesterColleague : Colleague
     {
-        IExpression leftExpression;
-        IExpression rightExpression;
+        public TesterColleague(Mediator mediator) : base(mediator) { }
 
-        public AddExpression(IExpression leftEx, IExpression rightEx)
+        public override void Notify(string message)
         {
-            leftExpression = leftEx;
-            rightExpression = rightEx;
-        }
-
-        public int Interpret(Context context)
-        {
-            return leftExpression.Interpret(context) + rightExpression.Interpret(context);
+            Console.WriteLine("Сообщение тестеру: " + message);
         }
     }
 
-    class SubtractExpression : IExpression
+    class ManagerMediator : Mediator
     {
-        IExpression leftExpression;
-        IExpression rightExpression;
-        public SubtractExpression(IExpression leftEx, IExpression rightEx)
+        public Colleague Programmer { get; set; }
+        public Colleague Tester { get; set; }
+        public Colleague Customer { get; set; }
+        public override void Send(string message, Colleague colleague)
         {
-            leftExpression = leftEx;
-            rightExpression = rightEx;
-        }
-
-        public int Interpret(Context context)
-        {
-            return leftExpression.Interpret(context) - rightExpression.Interpret(context);
+            if (colleague == Customer)
+                Programmer.Notify(message);
+            else if (colleague == Programmer)
+                Tester.Notify(message);
+            else if (colleague == Tester)
+                Customer.Notify(message);
         }
     }
 }
