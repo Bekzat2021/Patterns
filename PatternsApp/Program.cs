@@ -12,85 +12,83 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            ManagerMediator mediator = new ManagerMediator();
-            Colleague programmer = new ProgrammerColleague(mediator);
-            Colleague tester = new TesterColleague(mediator);
-            Colleague customer = new CustomerColleague(mediator);
+            Hero hero = new Hero();
+            hero.Shoot();
+            hero.Shoot();
 
-            mediator.Customer = customer;
-            mediator.Programmer = programmer;
-            mediator.Tester = tester;
+            GameHistory history = new GameHistory();
+            history.Log.Add("Первое сохранение", hero.Save());
+            hero.Shoot();
+            hero.Shoot();
+            history.Log.Add("Второе сохранение", hero.Save());
 
-            customer.Send("Есть заказ, надо сделать программу");
-            programmer.Send("Программа готова, надо протестировать");
-            tester.Send("Программа протестирована и готова к продаже");
+            history.ShowSavedGames();
+
+            Console.WriteLine("***");
+
+            hero.Restore(history.Log["Первое сохранение"]);
+
+            hero.Shoot();
         }
     }
 
-    public abstract class Mediator
+    class Hero
     {
-        public abstract void Send(string message, Colleague colleague);
-    }
+        private int bullets = 10;
+        private int health = 100;
 
-    public abstract class Colleague
-    {
-        Mediator mediator;
-        public Colleague(Mediator mediator)
+        public void Shoot()
         {
-            this.mediator = mediator;
+            if (bullets > 0)
+            {
+                bullets--;
+                Console.WriteLine($"Стреляем. Осталось {bullets} патронов");
+            }
+            else
+            {
+                Console.WriteLine("Патронов нет");
+            }
         }
 
-        public virtual void Send(string message)
+        public MementoHero Save()
         {
-            mediator.Send(message, this);
+            Console.WriteLine($"Сохраняемся уровень здоровья: {health} патронов: {bullets}");
+            return new MementoHero(bullets, health);
         }
 
-        public abstract void Notify(string message);
-    }
-
-    public class CustomerColleague : Colleague
-    {
-        public CustomerColleague(Mediator mediator) : base(mediator) { }
-
-        public override void Notify(string message)
+        public void Restore(MementoHero memento)
         {
-            Console.WriteLine("Сообщение заказчику: " + message);
-        }
-    }
-
-    public class ProgrammerColleague : Colleague
-    {
-        public ProgrammerColleague(Mediator mediator) : base(mediator) { }
-
-        public override void Notify(string message)
-        {
-            Console.WriteLine("Сообщение программисту: " + message);
+            this.bullets = memento.Bullets;
+            this.health = memento.Health;
         }
     }
 
-    public class TesterColleague : Colleague
+    class MementoHero
     {
-        public TesterColleague(Mediator mediator) : base(mediator) { }
-
-        public override void Notify(string message)
+        public int Bullets { get; set; }
+        public int Health { get; set; }
+        public MementoHero(int bullets, int health)
         {
-            Console.WriteLine("Сообщение тестеру: " + message);
+            Bullets = bullets;
+            Health = health;
         }
     }
 
-    class ManagerMediator : Mediator
+    class GameHistory
     {
-        public Colleague Programmer { get; set; }
-        public Colleague Tester { get; set; }
-        public Colleague Customer { get; set; }
-        public override void Send(string message, Colleague colleague)
+        public Dictionary<string, MementoHero> Log;
+        public GameHistory()
         {
-            if (colleague == Customer)
-                Programmer.Notify(message);
-            else if (colleague == Programmer)
-                Tester.Notify(message);
-            else if (colleague == Tester)
-                Customer.Notify(message);
+            Log = new Dictionary<string, MementoHero>();
+        }
+
+        public void ShowSavedGames()
+        {
+            Console.WriteLine("*** Список всех сохранении ***");
+            foreach (var item in Log)
+            {
+                Console.WriteLine($"{item.Key} - {item.Value.Bullets} - {item.Value.Health}");
+            }
         }
     }
 }
