@@ -12,83 +12,92 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Hero hero = new Hero();
-            hero.Shoot();
-            hero.Shoot();
+            TouristFromUS Tom = new TouristFromUS { Name = "Tom" };
+            TouristFromUK Sam = new TouristFromUK { Name = "Sam" };
 
-            GameHistory history = new GameHistory();
-            history.Log.Add("Первое сохранение", hero.Save());
-            hero.Shoot();
-            hero.Shoot();
-            history.Log.Add("Второе сохранение", hero.Save());
+            ListOfLocations locationInEurope = new ListOfLocations();
+            locationInEurope.Locations.Add(new City { Name = "Paris" });
+            locationInEurope.Locations.Add(new City { Name = "Berlin" });
+            locationInEurope.Locations.Add(new Country { Name = "Village1" });
+            locationInEurope.Locations.Add(new City { Name = "Munich" });
 
-            history.ShowSavedGames();
-
-            Console.WriteLine("***");
-
-            hero.Restore(history.Log["Первое сохранение"]);
-
-            hero.Shoot();
+            locationInEurope.VisitAllLocations(Tom);
         }
     }
 
-    class Hero
+    interface IVisitor
     {
-        private int bullets = 10;
-        private int health = 100;
+        void VisitCity(City city);
+        void VisitCountry(Country country);
+    }
 
-        public void Shoot()
+    class TouristFromUS : IVisitor
+    {
+        public string Name { get; set; }
+        public void VisitCity(City city)
         {
-            if (bullets > 0)
-            {
-                bullets--;
-                Console.WriteLine($"Стреляем. Осталось {bullets} патронов");
-            }
-            else
-            {
-                Console.WriteLine("Патронов нет");
-            }
+            Console.WriteLine($"Tourist from US visit city {city.Name}");
         }
 
-        public MementoHero Save()
+        public void VisitCountry(Country country)
         {
-            Console.WriteLine($"Сохраняемся уровень здоровья: {health} патронов: {bullets}");
-            return new MementoHero(bullets, health);
-        }
-
-        public void Restore(MementoHero memento)
-        {
-            this.bullets = memento.Bullets;
-            this.health = memento.Health;
+            Console.WriteLine($"Tourist from US visit country {country.Name}");
         }
     }
 
-    class MementoHero
+    class TouristFromUK : IVisitor
     {
-        public int Bullets { get; set; }
-        public int Health { get; set; }
-        public MementoHero(int bullets, int health)
+        public string Name { get; set; }
+        public void VisitCity(City city)
         {
-            Bullets = bullets;
-            Health = health;
+            Console.WriteLine($"Tourist from England visit city {city.Name}");
+        }
+
+        public void VisitCountry(Country country)
+        {
+            Console.WriteLine($"Tourist from England visit country {country.Name}");
         }
     }
 
-    class GameHistory
+    interface ILocation
     {
-        public Dictionary<string, MementoHero> Log;
-        public GameHistory()
-        {
-            Log = new Dictionary<string, MementoHero>();
-        }
+        public string Name { get; set; }
+        void Accept(IVisitor visitor);
+    }
 
-        public void ShowSavedGames()
+    class ListOfLocations
+    {
+        public List<ILocation> Locations { get; set; }
+        public ListOfLocations()
         {
-            Console.WriteLine("*** Список всех сохранении ***");
-            foreach (var item in Log)
+            Locations = new List<ILocation>();
+        }
+        public void VisitAllLocations(IVisitor visitor)
+        {
+            foreach (var item in Locations)
             {
-                Console.WriteLine($"{item.Key} - {item.Value.Bullets} - {item.Value.Health}");
+                item.Accept(visitor);
             }
+        }
+    }
+
+    class City : ILocation
+    {
+        public string Name { get; set; }
+
+        public void Accept(IVisitor visitor)
+        {
+            visitor.VisitCity(this);
+        }
+    }
+
+    class Country : ILocation
+    {
+        public string Name { get; set; }
+
+        public void Accept(IVisitor visitor)
+        {
+            visitor.VisitCountry(this);
         }
     }
 }
