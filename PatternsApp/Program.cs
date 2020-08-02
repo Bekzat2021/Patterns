@@ -12,66 +12,61 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Cake redCake = new RedCake("Red cake");
-            redCake = new CakeWithStrawberry(" strawberry ", redCake);
-            redCake = new CakeWithNuts(" nuts ", redCake);
-            redCake.CakeInfo();
+            Monitor monitor = new Monitor();
+            IHDMI HDMI_Cable = new HDMICable();
+            monitor.Display(HDMI_Cable);
+            
+            IVGA vga = new VGACable();
+            VGA_To_HDMI_Adapter adaptedVgaCable = new VGA_To_HDMI_Adapter(vga);
+            monitor.Display(adaptedVgaCable);
         }
     }
 
-    abstract class Cake
+    interface IHDMI
     {
-        public string Name { get; set; }
-        public Cake(string name)
-        {
-            Name = name;
-        }
-        public abstract void CakeInfo();
+        void TransferDataFast();
     }
 
-
-    internal class RedCake : Cake
+    class HDMICable : IHDMI
     {
-        public RedCake(string name) : base(name) { }
-        public override void CakeInfo()
+        public void TransferDataFast()
         {
-            Console.Write("Red Cake");
+            Console.WriteLine("HDMI cable transfer data fast");
         }
     }
 
-    internal abstract class CakeDecorator : Cake
+    class Monitor
     {
-        protected Cake cake;
-        public CakeDecorator(string name, Cake cake) : base(name)
+        public void Display(IHDMI hdmi)
         {
-            this.cake = cake;
+            hdmi.TransferDataFast();
         }
     }
 
-    class CakeWithStrawberry : CakeDecorator
+    interface IVGA
     {
-        public CakeWithStrawberry(string name, Cake cake) : base(name + " with strawberry", cake)
+        void TransferDataSlow();
+    }
+
+    class VGACable : IVGA
+    {
+        public void TransferDataSlow()
         {
-            this.cake = cake;
-        }
-        public override void CakeInfo()
-        {
-            cake.CakeInfo();
-            Console.Write(" with strawberry");
+            Console.WriteLine("VGA cable transfer data slow");
         }
     }
 
-
-    class CakeWithNuts : CakeDecorator
+    class VGA_To_HDMI_Adapter : IHDMI
     {
-        public CakeWithNuts(string name, Cake cake) : base(name + " with nuts ", cake)
+        IVGA vGA;
+        public VGA_To_HDMI_Adapter(IVGA vGA)
         {
-
+            this.vGA = vGA;
         }
-        public override void CakeInfo()
+
+        public void TransferDataFast()
         {
-            cake.CakeInfo();
-            Console.Write(" with many nuts");
+            vGA.TransferDataSlow();
         }
     }
 }
