@@ -12,61 +12,91 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Monitor monitor = new Monitor();
-            IHDMI HDMI_Cable = new HDMICable();
-            monitor.Display(HDMI_Cable);
+            TextEditor vsCode = new TextEditor();
+            Compiler csc = new Compiler();
+            CLR clr = new CLR();
+
+            VisualStudioFacade VS2019 = new VisualStudioFacade(vsCode, csc, clr);
+
+            Programmer bob = new Programmer();
+            bob.StartApp(VS2019);
+
+            Console.WriteLine(" * * * ");
             
-            IVGA vga = new VGACable();
-            VGA_To_HDMI_Adapter adaptedVgaCable = new VGA_To_HDMI_Adapter(vga);
-            monitor.Display(adaptedVgaCable);
+            bob.StopApp(VS2019);
         }
     }
 
-    interface IHDMI
+    class TextEditor
     {
-        void TransferDataFast();
-    }
-
-    class HDMICable : IHDMI
-    {
-        public void TransferDataFast()
+        public void Write()
         {
-            Console.WriteLine("HDMI cable transfer data fast");
+            Console.WriteLine("Writing code");
+        }
+
+        public void Save()
+        {
+            Console.WriteLine("Save code");
         }
     }
 
-    class Monitor
+    class Compiler
     {
-        public void Display(IHDMI hdmi)
+        public void Compile()
         {
-            hdmi.TransferDataFast();
+            Console.WriteLine("Compiling code");
         }
     }
 
-    interface IVGA
+    class CLR
     {
-        void TransferDataSlow();
-    }
-
-    class VGACable : IVGA
-    {
-        public void TransferDataSlow()
+        public void Start()
         {
-            Console.WriteLine("VGA cable transfer data slow");
+            Console.WriteLine("Starting application");
+        }
+
+        public void Stop()
+        {
+            Console.WriteLine("Shutdown application");
         }
     }
 
-    class VGA_To_HDMI_Adapter : IHDMI
+    class VisualStudioFacade
     {
-        IVGA vGA;
-        public VGA_To_HDMI_Adapter(IVGA vGA)
+        private TextEditor textEditor;
+        private Compiler compiler;
+        private CLR clr;
+        public VisualStudioFacade(TextEditor te, Compiler comp, CLR cl)
         {
-            this.vGA = vGA;
+            textEditor = te;
+            compiler = comp;
+            clr = cl;
         }
 
-        public void TransferDataFast()
+        public void RunApp()
         {
-            vGA.TransferDataSlow();
+            textEditor.Write();
+            textEditor.Save();
+            compiler.Compile();
+            clr.Start();
+        }
+
+        public void ShutdownApp()
+        {
+            clr.Stop();
+        }
+    }
+
+    class Programmer
+    {
+        public void StartApp(VisualStudioFacade visualStudioFacade)
+        {
+            visualStudioFacade.RunApp();
+        }
+
+        public void StopApp(VisualStudioFacade visualStudioFacade)
+        {
+            visualStudioFacade.ShutdownApp();
         }
     }
 }
