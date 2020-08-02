@@ -12,92 +12,66 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            TouristFromUS Tom = new TouristFromUS { Name = "Tom" };
-            TouristFromUK Sam = new TouristFromUK { Name = "Sam" };
-
-            ListOfLocations locationInEurope = new ListOfLocations();
-            locationInEurope.Locations.Add(new City { Name = "Paris" });
-            locationInEurope.Locations.Add(new City { Name = "Berlin" });
-            locationInEurope.Locations.Add(new Country { Name = "Village1" });
-            locationInEurope.Locations.Add(new City { Name = "Munich" });
-
-            locationInEurope.VisitAllLocations(Tom);
+            Cake redCake = new RedCake("Red cake");
+            redCake = new CakeWithStrawberry(" strawberry ", redCake);
+            redCake = new CakeWithNuts(" nuts ", redCake);
+            redCake.CakeInfo();
         }
     }
 
-    interface IVisitor
-    {
-        void VisitCity(City city);
-        void VisitCountry(Country country);
-    }
-
-    class TouristFromUS : IVisitor
+    abstract class Cake
     {
         public string Name { get; set; }
-        public void VisitCity(City city)
+        public Cake(string name)
         {
-            Console.WriteLine($"Tourist from US visit city {city.Name}");
+            Name = name;
         }
+        public abstract void CakeInfo();
+    }
 
-        public void VisitCountry(Country country)
+
+    internal class RedCake : Cake
+    {
+        public RedCake(string name) : base(name) { }
+        public override void CakeInfo()
         {
-            Console.WriteLine($"Tourist from US visit country {country.Name}");
+            Console.Write("Red Cake");
         }
     }
 
-    class TouristFromUK : IVisitor
+    internal abstract class CakeDecorator : Cake
     {
-        public string Name { get; set; }
-        public void VisitCity(City city)
+        protected Cake cake;
+        public CakeDecorator(string name, Cake cake) : base(name)
         {
-            Console.WriteLine($"Tourist from England visit city {city.Name}");
-        }
-
-        public void VisitCountry(Country country)
-        {
-            Console.WriteLine($"Tourist from England visit country {country.Name}");
+            this.cake = cake;
         }
     }
 
-    interface ILocation
+    class CakeWithStrawberry : CakeDecorator
     {
-        public string Name { get; set; }
-        void Accept(IVisitor visitor);
-    }
-
-    class ListOfLocations
-    {
-        public List<ILocation> Locations { get; set; }
-        public ListOfLocations()
+        public CakeWithStrawberry(string name, Cake cake) : base(name + " with strawberry", cake)
         {
-            Locations = new List<ILocation>();
+            this.cake = cake;
         }
-        public void VisitAllLocations(IVisitor visitor)
+        public override void CakeInfo()
         {
-            foreach (var item in Locations)
-            {
-                item.Accept(visitor);
-            }
+            cake.CakeInfo();
+            Console.Write(" with strawberry");
         }
     }
 
-    class City : ILocation
-    {
-        public string Name { get; set; }
 
-        public void Accept(IVisitor visitor)
+    class CakeWithNuts : CakeDecorator
+    {
+        public CakeWithNuts(string name, Cake cake) : base(name + " with nuts ", cake)
         {
-            visitor.VisitCity(this);
+
         }
-    }
-
-    class Country : ILocation
-    {
-        public string Name { get; set; }
-
-        public void Accept(IVisitor visitor)
+        public override void CakeInfo()
         {
-            visitor.VisitCountry(this);
+            cake.CakeInfo();
+            Console.Write(" with many nuts");
         }
     }
 }
