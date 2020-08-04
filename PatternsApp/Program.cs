@@ -12,91 +12,88 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            TextEditor vsCode = new TextEditor();
-            Compiler csc = new Compiler();
-            CLR clr = new CLR();
+            Component fileSystem = new Directory("Файловая система");
+            Component diskC = new Directory("Диск С");
+            Component pngFile = new File("12345.png");
+            Component docxFile = new File("Document.docx");
+            diskC.Add(pngFile);
+            diskC.Add(docxFile);
+            fileSystem.Add(diskC);
 
-            VisualStudioFacade VS2019 = new VisualStudioFacade(vsCode, csc, clr);
 
-            Programmer bob = new Programmer();
-            bob.StartApp(VS2019);
+            fileSystem.Print();
+            Console.WriteLine();
 
-            Console.WriteLine(" * * * ");
-            
-            bob.StopApp(VS2019);
+            diskC.Remove(pngFile);
+
+            Component docsFolder = new Directory("Мои Документы");
+            Component txtFile = new File("readme.txt");
+            Component csFile = new File("Program.cs");
+            docsFolder.Add(txtFile);
+            docsFolder.Add(csFile);
+            diskC.Add(docsFolder);
+
+            fileSystem.Print();
+
+            txtFile.Add(csFile);
         }
     }
 
-    class TextEditor
+    public abstract class Component
     {
-        public void Write()
+        protected string name;
+        public Component(string name)
         {
-            Console.WriteLine("Writing code");
+            this.name = name;
         }
 
-        public void Save()
+        public virtual void Add(Component component) { }
+        public virtual void Remove(Component component) { }
+
+        public virtual void Print()
         {
-            Console.WriteLine("Save code");
+            Console.WriteLine(name);
         }
     }
 
-    class Compiler
+    public class Directory : Component
     {
-        public void Compile()
+        private List<Component> components = new List<Component>();
+        public Directory(string name) : base(name) { }
+
+        public override void Add(Component component)
         {
-            Console.WriteLine("Compiling code");
+            components.Add(component);
+        }
+
+        public override void Remove(Component component)
+        {
+            components.Remove(component);
+        }
+
+        public override void Print()
+        {
+            Console.WriteLine("Узел " + name);
+            Console.WriteLine("Подузлы:");
+            for (int i = 0; i < components.Count; i++)
+            {
+                components[i].Print();
+            }
         }
     }
 
-    class CLR
+    public class File : Component
     {
-        public void Start()
+        public File(string name) : base(name) { }
+
+        public override void Add(Component component)
         {
-            Console.WriteLine("Starting application");
+            Console.WriteLine("Это файл в него нельзя ничего добавить");
         }
 
-        public void Stop()
+        public override void Remove(Component component)
         {
-            Console.WriteLine("Shutdown application");
-        }
-    }
-
-    class VisualStudioFacade
-    {
-        private TextEditor textEditor;
-        private Compiler compiler;
-        private CLR clr;
-        public VisualStudioFacade(TextEditor te, Compiler comp, CLR cl)
-        {
-            textEditor = te;
-            compiler = comp;
-            clr = cl;
-        }
-
-        public void RunApp()
-        {
-            textEditor.Write();
-            textEditor.Save();
-            compiler.Compile();
-            clr.Start();
-        }
-
-        public void ShutdownApp()
-        {
-            clr.Stop();
-        }
-    }
-
-    class Programmer
-    {
-        public void StartApp(VisualStudioFacade visualStudioFacade)
-        {
-            visualStudioFacade.RunApp();
-        }
-
-        public void StopApp(VisualStudioFacade visualStudioFacade)
-        {
-            visualStudioFacade.ShutdownApp();
+            Console.WriteLine("Это файл из него нельзя ничего удалить");
         }
     }
 }
