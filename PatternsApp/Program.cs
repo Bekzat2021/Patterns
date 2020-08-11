@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -12,88 +14,60 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Component fileSystem = new Directory("Файловая система");
-            Component diskC = new Directory("Диск С");
-            Component pngFile = new File("12345.png");
-            Component docxFile = new File("Document.docx");
-            diskC.Add(pngFile);
-            diskC.Add(docxFile);
-            fileSystem.Add(diskC);
+            BookStoreProxy proxy = new BookStoreProxy();
+            Page page1 = proxy.GetPage(1);
+            Console.WriteLine(page1.Text);
 
+            Page page2 = proxy.GetPage(2);
+            Console.WriteLine(page2.Text);
 
-            fileSystem.Print();
-            Console.WriteLine();
-
-            diskC.Remove(pngFile);
-
-            Component docsFolder = new Directory("Мои Документы");
-            Component txtFile = new File("readme.txt");
-            Component csFile = new File("Program.cs");
-            docsFolder.Add(txtFile);
-            docsFolder.Add(csFile);
-            diskC.Add(docsFolder);
-
-            fileSystem.Print();
-
-            txtFile.Add(csFile);
+            page1 = proxy.GetPage(1);
+            Console.WriteLine(page1.Text);
         }
     }
 
-    public abstract class Component
+    class Page
     {
-        protected string name;
-        public Component(string name)
-        {
-            this.name = name;
-        }
+        public int Number { get; set; }
+        public string Text { get; set; }
+    }
 
-        public virtual void Add(Component component) { }
-        public virtual void Remove(Component component) { }
 
-        public virtual void Print()
+    interface IBook 
+    {
+        Page GetPage(int number);
+    }
+
+    class BookStore : IBook
+    {
+        public Page GetPage(int number)
         {
-            Console.WriteLine(name);
+            return new Page { Number = number, Text = $"Page {number} number with simple text" };
         }
     }
 
-    public class Directory : Component
+    class BookStoreProxy : IBook
     {
-        private List<Component> components = new List<Component>();
-        public Directory(string name) : base(name) { }
-
-        public override void Add(Component component)
+        List<Page> pages;
+        BookStore BookStore;
+        public BookStoreProxy()
         {
-            components.Add(component);
+            pages = new List<Page>();
         }
-
-        public override void Remove(Component component)
+        
+        public Page GetPage(int number)
         {
-            components.Remove(component);
-        }
-
-        public override void Print()
-        {
-            Console.WriteLine("Узел " + name);
-            Console.WriteLine("Подузлы:");
-            for (int i = 0; i < components.Count; i++)
+            Page page = pages.FirstOrDefault(p => p.Number == number);
+            if (page == null)
             {
-                components[i].Print();
+                if (BookStore == null)
+                {
+                    BookStore = new BookStore();
+                }
+                page = BookStore.GetPage(number);
+                pages.Add(page);
             }
-        }
-    }
-
-    public class File : Component
-    {
-        public File(string name) : base(name) { }
-
-        public override void Add(Component component)
-        {
-            Console.WriteLine("Это файл в него нельзя ничего добавить");
-        }
-
-        public override void Remove(Component component)
-        {
-            Console.WriteLine("Это файл из него нельзя ничего удалить");
+            return page;
         }
     }
 }
