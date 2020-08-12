@@ -14,60 +14,92 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            BookStoreProxy proxy = new BookStoreProxy();
-            Page page1 = proxy.GetPage(1);
-            Console.WriteLine(page1.Text);
+            Programmer freelancer = new FreelanceProgrammer(new CPPLanguage());
+            freelancer.Work();
+            freelancer.EarnMoney();
 
-            Page page2 = proxy.GetPage(2);
-            Console.WriteLine(page2.Text);
+            freelancer.Language = new CSharpLanguage();
+            freelancer.Work();
+            freelancer.EarnMoney();
 
-            page1 = proxy.GetPage(1);
-            Console.WriteLine(page1.Text);
+            Console.WriteLine();
+            
+            CorporateProgrammer corporateProgrammer = new CorporateProgrammer(new CSharpLanguage());
+            corporateProgrammer.Work();
+            corporateProgrammer.EarnMoney();
         }
     }
 
-    class Page
+    interface ILanguage
     {
-        public int Number { get; set; }
-        public string Text { get; set; }
+        void Build();
+        void Execute();
     }
 
-
-    interface IBook 
+    class CPPLanguage : ILanguage
     {
-        Page GetPage(int number);
-    }
-
-    class BookStore : IBook
-    {
-        public Page GetPage(int number)
+        public void Build()
         {
-            return new Page { Number = number, Text = $"Page {number} number with simple text" };
+            Console.WriteLine("Using the C ++ compiler, we compile the program into binary code");
+        }
+
+        public void Execute()
+        {
+            Console.WriteLine("Run the executable file of the program");
         }
     }
 
-    class BookStoreProxy : IBook
+    class CSharpLanguage : ILanguage
     {
-        List<Page> pages;
-        BookStore BookStore;
-        public BookStoreProxy()
+        void ILanguage.Build()
         {
-            pages = new List<Page>();
+            Console.WriteLine("Using the Roslyn compiler, we compile the source code into an exe file");
         }
-        
-        public Page GetPage(int number)
+
+        void ILanguage.Execute()
         {
-            Page page = pages.FirstOrDefault(p => p.Number == number);
-            if (page == null)
-            {
-                if (BookStore == null)
-                {
-                    BookStore = new BookStore();
-                }
-                page = BookStore.GetPage(number);
-                pages.Add(page);
-            }
-            return page;
+            Console.WriteLine("JIT compiles a binary program /nCLR executes compiled binary");
+        }
+    }
+
+    abstract class Programmer
+    {
+        public ILanguage Language { get; set; }
+        public Programmer(ILanguage lang)
+        {
+            Language = lang;
+        }
+
+        public virtual void Work()
+        {
+            Language.Build();
+            Language.Execute();
+        }
+
+        public abstract void EarnMoney();
+    }
+
+    class FreelanceProgrammer : Programmer
+    {
+        public FreelanceProgrammer(ILanguage lang) : base(lang)
+        {
+
+        }
+        public override void EarnMoney()
+        {
+            Console.WriteLine("We receive payment for the completed order");
+        }
+    }
+
+    class CorporateProgrammer : Programmer
+    {
+        public CorporateProgrammer(ILanguage lang) : base(lang)
+        {
+
+        }
+        public override void EarnMoney()
+        {
+            Console.WriteLine("We receive a salary at the end of the month");
         }
     }
 }
