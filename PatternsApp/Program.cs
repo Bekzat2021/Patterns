@@ -14,53 +14,81 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Cook smith = new Cook("Smith");
-            smith.MakeDinner(new PotatoMeal());
-            smith.MakeDinner(new SaladMeal());
+            User bob = new UserBuilder().SetName("Bob").SetAge(22).SetCompany("IBM").SetMarried(true).Build();
+            bob.About();
+            Console.WriteLine();
+
+            User sam = User.CreateBuilder().SetAge(23).SetName("Sam").SetCompany("Google").SetMarried(false).Build();
+            sam.About();
+            Console.WriteLine();
+
+            User alice = new UserBuilder().SetCompany("Microsoft").SetName("Alice").SetAge(21).SetMarried(false);
+            alice.About();
+            Console.WriteLine();
         }
     }
 
-    interface IMeal
-    {
-        void Make();
-    }
-
-    class Cook
+    class User
     {
         public string Name { get; set; }
-        public Cook(string name)
+        public string Company { get; set; }
+        public int Age { get; set; }
+        public bool IsMarried { get; set; }
+
+        public void About()
         {
-            Name = name;
+            Console.WriteLine($"Name: {Name}");
+            Console.WriteLine($"Age: {Age}");
+            Console.WriteLine($"Company: {Company}");
+            Console.WriteLine($"Married: {IsMarried}");
         }
 
-        public void MakeDinner(IMeal meal)
+        public static UserBuilder CreateBuilder()
         {
-            meal.Make();
-        }
-    }
-
-    class PotatoMeal : IMeal
-    {
-        public void Make()
-        {
-            Console.WriteLine("Чистим и моем картошку");
-            Console.WriteLine("Ставим почищенную картошку на огонь");
-            Console.WriteLine("Варим около 30 минут");
-            Console.WriteLine("Сливаем остатки воды, разминаем варенный картофель в пюре");
-            Console.WriteLine("Посыпаем пюре специями и зеленью");
-            Console.WriteLine("Картофельное пюре готово");
+            return new UserBuilder();
         }
     }
 
-    class SaladMeal : IMeal
+    class UserBuilder
     {
-        void IMeal.Make()
+        private User user;
+        public UserBuilder()
         {
-            Console.WriteLine("Моем помидоры и огурцы");
-            Console.WriteLine("Нарезаем помидоры и огурцы");
-            Console.WriteLine("Поспаем зеленью, солью и специями");
-            Console.WriteLine("Поливаем подсолнечным маслом");
-            Console.WriteLine("Салат готов");
+            user = new User();
+        }
+
+        public UserBuilder SetName(string name)
+        {
+            user.Name = name;
+            return this;
+        }
+
+        public UserBuilder SetAge(int age)
+        {
+            user.Age = age > 0 ? age : 0;
+            return this;
+        }
+
+        public UserBuilder SetCompany(string company)
+        {
+            user.Company = company;
+            return this;
+        }
+
+        public UserBuilder SetMarried(bool isMarried)
+        {
+            user.IsMarried = isMarried;
+            return this;
+        }
+
+        public User Build()
+        {
+            return user;
+        }
+
+        public static implicit operator User(UserBuilder userBuilder)
+        {
+            return userBuilder.user;
         }
     }
 }
