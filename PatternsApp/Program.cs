@@ -14,92 +14,53 @@ namespace PatternsApp
     {
         static void Main(string[] args)
         {
-            Programmer freelancer = new FreelanceProgrammer(new CPPLanguage());
-            freelancer.Work();
-            freelancer.EarnMoney();
-
-            freelancer.Language = new CSharpLanguage();
-            freelancer.Work();
-            freelancer.EarnMoney();
-
-            Console.WriteLine();
-            
-            CorporateProgrammer corporateProgrammer = new CorporateProgrammer(new CSharpLanguage());
-            corporateProgrammer.Work();
-            corporateProgrammer.EarnMoney();
+            Cook smith = new Cook("Smith");
+            smith.MakeDinner(new PotatoMeal());
+            smith.MakeDinner(new SaladMeal());
         }
     }
 
-    interface ILanguage
+    interface IMeal
     {
-        void Build();
-        void Execute();
+        void Make();
     }
 
-    class CPPLanguage : ILanguage
+    class Cook
     {
-        public void Build()
+        public string Name { get; set; }
+        public Cook(string name)
         {
-            Console.WriteLine("Using the C ++ compiler, we compile the program into binary code");
+            Name = name;
         }
 
-        public void Execute()
+        public void MakeDinner(IMeal meal)
         {
-            Console.WriteLine("Run the executable file of the program");
-        }
-    }
-
-    class CSharpLanguage : ILanguage
-    {
-        void ILanguage.Build()
-        {
-            Console.WriteLine("Using the Roslyn compiler, we compile the source code into an exe file");
-        }
-
-        void ILanguage.Execute()
-        {
-            Console.WriteLine("JIT compiles a binary program /nCLR executes compiled binary");
+            meal.Make();
         }
     }
 
-    abstract class Programmer
+    class PotatoMeal : IMeal
     {
-        public ILanguage Language { get; set; }
-        public Programmer(ILanguage lang)
+        public void Make()
         {
-            Language = lang;
-        }
-
-        public virtual void Work()
-        {
-            Language.Build();
-            Language.Execute();
-        }
-
-        public abstract void EarnMoney();
-    }
-
-    class FreelanceProgrammer : Programmer
-    {
-        public FreelanceProgrammer(ILanguage lang) : base(lang)
-        {
-
-        }
-        public override void EarnMoney()
-        {
-            Console.WriteLine("We receive payment for the completed order");
+            Console.WriteLine("Чистим и моем картошку");
+            Console.WriteLine("Ставим почищенную картошку на огонь");
+            Console.WriteLine("Варим около 30 минут");
+            Console.WriteLine("Сливаем остатки воды, разминаем варенный картофель в пюре");
+            Console.WriteLine("Посыпаем пюре специями и зеленью");
+            Console.WriteLine("Картофельное пюре готово");
         }
     }
 
-    class CorporateProgrammer : Programmer
+    class SaladMeal : IMeal
     {
-        public CorporateProgrammer(ILanguage lang) : base(lang)
+        void IMeal.Make()
         {
-
-        }
-        public override void EarnMoney()
-        {
-            Console.WriteLine("We receive a salary at the end of the month");
+            Console.WriteLine("Моем помидоры и огурцы");
+            Console.WriteLine("Нарезаем помидоры и огурцы");
+            Console.WriteLine("Поспаем зеленью, солью и специями");
+            Console.WriteLine("Поливаем подсолнечным маслом");
+            Console.WriteLine("Салат готов");
         }
     }
 }
